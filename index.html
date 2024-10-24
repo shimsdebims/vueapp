@@ -11,17 +11,89 @@
 </head>
 <body>
 
-<div id="app">
-    <!-- Content will go here -->
+<div id="app" class="container mt-5">
+    <h1>Acailable Courses and Activities</h1>
+
+        <div class="form-group"></div>
+            <label for="sortBy"> Sort by:</label>
+            <select v-model="sortKey" @change="sortLessons" class="form-control" id="sortBy">
+            <option value="subject">Subject</option>
+            <option value="location">Location</option>
+            <option value="price">Price</option>
+            <option value="space">Availability</option>
+            </select>
+</div>
+
+<div class="form-group">
+    <label>Order:</label>
+    <button @click="toggleSortOrder" class="btn btn-info">
+        {{ sortOrder === 'asc' ? 'Ascending' : 'Descending' }}
+    </button>
+</div>
+
+<!-- Display Lessons -->
+<ul class="list-group">
+    <li class="list-group-item" v-for="lesson in sortedLessons" :key="lesson.subject">
+        {{ lesson.subject }} - {{ lesson.location }} - ${{ lesson.price }} - Available: {{ lesson.space }}
+        <button 
+            @click="addToCart(lesson)" 
+            :disabled="lesson.space === 0" 
+            class="btn btn-primary float-right ml-3"
+        >
+            {{ lesson.space === 0 ? 'Full' : 'Add to Cart' }}
+        </button>
+    </li>
+</ul>
+ <!-- Shopping Cart -->
+ <h2 class="mt-4">Shopping Cart</h2>
+ <ul class="list-group">
+     <li class="list-group-item" v-for="item in cart">{{ item.subject }} - ${{ item.price }}</li>
+ </ul>
 </div>
 
 <script>
-    new Vue({
-        el: '#app',
-        data: {
-            message: 'Hello Vue!'
-        }
-    });
+ // Vue instance
+ new Vue({
+     el: '#app',
+     data: {
+         lessons: [
+             { subject: 'Math', location: 'BG01', price: 100, space: 5 },
+             { subject: 'Science', location: 'HB20', price: 80, space: 2 },
+             { subject: 'English', location: 'BG09 Cross', price: 90, space: 6 },
+             { subject: 'Art', location: 'SF05', price: 95, space: 0 }, 
+             { subject: 'Algebra', location: 'AS22', price: 95, space: 0 },
+             { subject: 'History', location: 'CG02', price: 95, space: 0 },
+             { subject: 'Geography', location: 'CG03', price: 95, space: 0 },
+             { subject: 'Chemistry', location: 'HG01', price: 95, space: 0 },
+             { subject: 'Paddle', location: 'E101', price: 95, space: 0 },
+             { subject: 'Volleyball', location: 'HG01', price: 95, space: 0 } 
+         ],
+         cart: [],
+         sortKey: 'subject',
+         sortOrder: 'asc'
+     },
+     computed: {
+         sortedLessons() {
+             return this.lessons.sort((a, b) => {
+                 let modifier = this.sortOrder === 'asc' ? 1 : -1;
+                 if (a[this.sortKey] < b[this.sortKey]) return -1 * modifier;
+                 if (a[this.sortKey] > b[this.sortKey]) return 1 * modifier;
+                 return 0;
+             });
+         }
+     },
+     methods: {
+         addToCart(lesson) {
+             if (lesson.space > 0) {
+                 this.cart.push(lesson);
+                 lesson.space -= 1;
+             }
+         },
+         toggleSortOrder() {
+             this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
+         }
+     }
+ });
 </script>
 
 </body>
