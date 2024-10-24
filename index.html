@@ -4,97 +4,150 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vue.js App</title>
-    <!-- Add Bootstrap for styling (optional) -->
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Vue.js 2.7 CDN -->
     <script src="https://cdn.jsdelivr.net/npm/vue@2.7.10/dist/vue.js"></script>
+    <style>
+        .course-card {
+            margin: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            text-align: center;
+        }
+        .course-image {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+    </style>
 </head>
 <body>
 
 <div id="app" class="container mt-5">
-    <h1>Acailable Courses and Activities</h1>
+    <h1>Available Courses and Activities</h1>
 
-        <div class="form-group"></div>
-            <label for="sortBy"> Sort by:</label>
-            <select v-model="sortKey" @change="sortLessons" class="form-control" id="sortBy">
+    <div class="form-group">
+        <label for="sortBy">Sort by:</label>
+        <select v-model="sortKey" @change="sortLessons" class="form-control" id="sortBy">
             <option value="subject">Subject</option>
             <option value="location">Location</option>
             <option value="price">Price</option>
             <option value="space">Availability</option>
-            </select>
-</div>
-
-<div class="form-group">
-    <label>Order:</label>
-    <button @click="toggleSortOrder" class="btn btn-info">
-        {{ sortOrder === 'asc' ? 'Ascending' : 'Descending' }}
+        </select>
+    </div>
+    <br>
+    Order: 
+    <button @click="toggleSortOrder">
+        {{ sortOrder === 'asc' ? 'Ascending' : 'Descending'}}
     </button>
-</div>
 
-<!-- Display Lessons -->
-<ul class="list-group">
-    <li class="list-group-item" v-for="lesson in sortedLessons" :key="lesson.subject">
-        {{ lesson.subject }} - {{ lesson.location }} - ${{ lesson.price }} - Available: {{ lesson.space }}
-        <button 
-            @click="addToCart(lesson)" 
-            :disabled="lesson.space === 0" 
-            class="btn btn-primary float-right ml-3"
-        >
-            {{ lesson.space === 0 ? 'Full' : 'Add to Cart' }}
+    <div v-if="showLessons" class="row">
+        <div class="col-md-4" v-for="lesson in sortedLessons" :key="lesson.subject">
+            <div class="course-card">
+                <img :src="lesson.image" alt="Course Image" class="course-image">
+                <h5>{{ lesson.subject }}</h5>
+                <p>Location: {{ lesson.location }}</p>
+                <p>Price: ${{ lesson.price }}</p>
+                <p>Available: {{ lesson.space }}</p>
+                <button 
+                    @click="addToCart(lesson)" 
+                    :disabled="lesson.space === 0" 
+                    class="btn btn-primary"
+                >
+                    {{ lesson.space === 0 ? 'Full' : 'Add to Cart' }}
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div v-if="cart.length > 0">
+        <button @click="toggleCart" class="btn btn-secondary mt-4">
+            {{ showCart ? 'Go Back' : 'View Cart' }}
         </button>
-    </li>
-</ul>
- <!-- Shopping Cart -->
- <h2 class="mt-4">Shopping Cart</h2>
- <ul class="list-group">
-     <li class="list-group-item" v-for="item in cart">{{ item.subject }} - ${{ item.price }}</li>
- </ul>
+    </div>
+
+    <div v-if="showCart">
+        <h2 class="mt-4">Shopping Cart</h2>
+        <ul class="list-group">
+            <li class="list-group-item" v-for="(item, index) in cart" :key="item.subject">
+                {{ item.subject }} - ${{ item.price }}
+                <button @click="removeFromCart(index)" class="btn btn-danger float-right">Remove</button>
+            </li>
+        </ul>
+        <h3>Checkout</h3>
+        <input v-model="customerName" placeholder="Name" class="form-control" />
+        <input v-model="customerPhone" placeholder="Phone" class="form-control" />
+        <button :disabled="!isCheckoutEnabled" class="btn btn-success mt-2">Checkout</button>
+    </div>
 </div>
 
 <script>
- // Vue instance
- new Vue({
-     el: '#app',
-     data: {
-         lessons: [
-             { subject: 'Math', location: 'BG01', price: 100, space: 5 },
-             { subject: 'Science', location: 'HB20', price: 80, space: 2 },
-             { subject: 'English', location: 'BG09 Cross', price: 90, space: 6 },
-             { subject: 'Art', location: 'SF05', price: 95, space: 0 }, 
-             { subject: 'Algebra', location: 'AS22', price: 95, space: 0 },
-             { subject: 'History', location: 'CG02', price: 95, space: 0 },
-             { subject: 'Geography', location: 'CG03', price: 95, space: 0 },
-             { subject: 'Chemistry', location: 'HG01', price: 95, space: 0 },
-             { subject: 'Paddle', location: 'E101', price: 95, space: 0 },
-             { subject: 'Volleyball', location: 'HG01', price: 95, space: 0 } 
-         ],
-         cart: [],
-         sortKey: 'subject',
-         sortOrder: 'asc'
-     },
-     computed: {
-         sortedLessons() {
-             return this.lessons.sort((a, b) => {
-                 let modifier = this.sortOrder === 'asc' ? 1 : -1;
-                 if (a[this.sortKey] < b[this.sortKey]) return -1 * modifier;
-                 if (a[this.sortKey] > b[this.sortKey]) return 1 * modifier;
-                 return 0;
-             });
-         }
-     },
-     methods: {
-         addToCart(lesson) {
-             if (lesson.space > 0) {
-                 this.cart.push(lesson);
-                 lesson.space -= 1;
-             }
-         },
-         toggleSortOrder() {
-             this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
-         }
-     }
- });
-</script>
+new Vue({
+    el: '#app',
+    data: {
+        lessons: [
+            { subject: 'Math', location: 'BG01', price: 100, space: 5, image: 'https://via.placeholder.com/150' },
+            { subject: 'Science', location: 'Room HB20', price: 80, space: 2, image: 'https://via.placeholder.com/150' },
+            { subject: 'Spanish', location: 'Room BG01 ', price: 90, space: 6, image: 'https://via.placeholder.com/150' },
+            { subject: 'French', location: 'Room HG05 ', price: 90, space: 6, image: 'https://via.placeholder.com/150' },
+            { subject: 'German', location: 'Room BG02 ', price: 90, space: 6, image: 'https://via.placeholder.com/150' },
+            { subject: 'Chemistry', location: 'Room BG09 ', price: 90, space: 6, image: 'https://via.placeholder.com/150' },
+            { subject: 'Biology', location: 'Room HG04 ', price: 90, space: 6, image: 'https://via.placeholder.com/150' },
+            { subject: 'Algebra', location: 'Room CG03 ', price: 90, space: 6, image: 'https://via.placeholder.com/150' },
+            { subject: 'History', location: 'Room HG01 ', price: 90, space: 6, image: 'https://via.placeholder.com/150' },
+            { subject: 'Geography', location: 'Room CG01 ', price: 90, space: 6, image: 'https://via.placeholder.com/150' },
 
+          
+        ],
+        cart: [],
+        sortKey: 'subject',
+        sortOrder: 'asc',
+        showLessons: true,
+        showCart: false,
+        customerName: '',
+        customerPhone: ''
+    },
+    computed: {
+        sortedLessons: function() {
+            return this.lessons.slice().sort((a, b) => {
+                if (this.sortOrder === 'asc') {
+                    return a[this.sortKey] > b[this.sortKey] ? 1 : -1;
+                } else {
+                    return a[this.sortKey] < b[this.sortKey] ? 1 : -1;
+                }
+            });
+        },
+        isCheckoutEnabled: function() {
+            return this.customerName && this.customerPhone;
+        }
+    },
+    methods: {
+        sortLessons: function() {
+            this.lessons.sort((a, b) => {
+                if (this.sortOrder === 'asc') {
+                    return a[this.sortKey] > b[this.sortKey] ? 1 : -1;
+                } else {
+                    return a[this.sortKey] < b[this.sortKey] ? 1 : -1;
+                }
+            });
+        },
+        toggleSortOrder: function() {
+            this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
+        },
+        addToCart: function(lesson) {
+            this.cart.push(lesson);
+            this.lessons.find(l => l.subject === lesson.subject).space--;
+        },
+        removeFromCart: function(index) {
+            const removedLesson = this.cart.splice(index, 1)[0];
+            this.lessons.find(l => l.subject === removedLesson.subject).space++;
+        },
+        toggleCart: function() {
+            this.showLessons = !this.showLessons;
+            this.showCart = !this.showCart;
+        }
+    }
+});
+</script>
 </body>
 </html>
