@@ -76,7 +76,10 @@
         </ul>
         <h3>Checkout</h3>
         <input v-model="customerName" placeholder="Name" class="form-control" />
+        <p v-if="!isNameValid" class="text-danger">Name must only contain letters and spaces.</p>
         <input v-model="customerPhone" placeholder="Phone" class="form-control" />
+        <p v-if="!isPhoneValid" class="text-danger">Phone number must be 10 digits.</p>
+
         <button :disabled="!isCheckoutEnabled" class="btn btn-success mt-2">Checkout</button>
     </div>
 </div>
@@ -117,9 +120,19 @@ new Vue({
                 }
             });
         },
-        isCheckoutEnabled: function() {
-            return this.customerName && this.customerPhone;
-        }
+
+        isNameValid() {
+            const nameRegex = /^[a-zA-Z\s]+$/; // Allows letters and spaces
+            return nameRegex.test(this.customerName);
+        },
+        isPhoneValid() {
+            const phoneRegex = /^\d{10}$/; // Ensures exactly 10 digits
+            return phoneRegex.test(this.customerPhone);
+        },
+        isCheckoutEnabled() {
+            return this.isNameValid && this.isPhoneValid; // Both must be valid
+        },
+
     },
     methods: {
         sortLessons: function() {
