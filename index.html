@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vue.js App</title>
+    <title>After School Lessons</title>
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/vue@2.7.10/dist/vue.js"></script>
-    <style>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.7.10/dist/vue.js"></script>    
+  /  <style>
         .course-card {
             margin: 10px;
             border: 1px solid #ccc;
@@ -42,6 +42,9 @@
     </button>
 
     <div v-if="showLessons" class="row">
+        <div v-if="lessons.length ===0" class="col-12 text-center" >
+            <p>Loading courses...</p>
+        </div>
         <div class="col-md-4" v-for="lesson in sortedLessons" :key="lesson.subject">
             <div class="course-card">
                 <img :src="lesson.image" alt="Course Image" class="course-image">
@@ -79,8 +82,10 @@
         <p v-if="!isNameValid" class="text-danger">Name must only contain letters and spaces.</p>
         <input v-model="customerPhone" placeholder="Phone" class="form-control" />
         <p v-if="!isPhoneValid" class="text-danger">Phone number must be 10 digits.</p>
-
-        <button :disabled="!isCheckoutEnabled" class="btn btn-success mt-2">Checkout</button>
+    
+        <button @click="checkout":disabled="!isCheckoutEnabled" class="btn btn-success mt-2" >
+            Checkout
+        </button>
     </div>
 </div>
 
@@ -88,20 +93,7 @@
 new Vue({
     el: '#app',
     data: {
-        lessons: [
-            { subject: 'Math', location: 'BG01', price: 100, space: 7, image: './course_imgs/math.png' },
-            { subject: 'Economics', location: 'Room HB20', price: 80, space: 8, image: './course_imgs/economics.png' },
-            { subject: 'Spanish', location: 'Room BG01 ', price: 90, space: 10, image: './course_imgs/spain.png' },
-            { subject: 'French', location: 'Room HG05 ', price: 90, space: 3, image: './course_imgs/france.png' },
-            { subject: 'German', location: 'Room BG02 ', price: 90, space: 2, image: './course_imgs/germany.png' },
-            { subject: 'Chemistry', location: 'Room BG09 ', price: 150, space: 10, image: './course_imgs/chemistry.png' },
-            { subject: 'Biology', location: 'Room HG04 ', price: 100, space: 6, image: './course_imgs/biology.png' },
-            { subject: 'Algebra', location: 'Room CG03 ', price: 120, space: 4, image: './course_imgs/algebra.png' },
-            { subject: 'History', location: 'Room HG01 ', price: 70, space: 9, image: './course_imgs/history.png' },
-            { subject: 'Advanced Math', location: 'Room CG01 ', price: 250, space: 1, image: './course_imgs/advanced-math.png' },
-
-          
-        ],
+        lessons: [], //fetched dynamically
         cart: [],
         sortKey: 'subject',
         sortOrder: 'asc',
@@ -120,22 +112,22 @@ new Vue({
                 }
             });
         },
-
         isNameValid() {
-            const nameRegex = /^[a-zA-Z\s]+$/; // Allows letters and spaces
+            const nameRegex = /^[a-zA-Z\s]+$/; 
             return nameRegex.test(this.customerName);
         },
         isPhoneValid() {
-            const phoneRegex = /^\d{10}$/; // Ensures exactly 10 digits
+            const phoneRegex = /^\d{10}$/; 
             return phoneRegex.test(this.customerPhone);
         },
         isCheckoutEnabled() {
-            return this.isNameValid && this.isPhoneValid; // Both must be valid
-        },
-
+            return this.isNameValid && 
+                   this.isPhoneValid && 
+                   this.cart.length > 0;
+        }
     },
     methods: {
-        sortLessons: function() {
+        sortLessons() {
             this.lessons.sort((a, b) => {
                 if (this.sortOrder === 'asc') {
                     return a[this.sortKey] > b[this.sortKey] ? 1 : -1;
@@ -144,21 +136,99 @@ new Vue({
                 }
             });
         },
-        toggleSortOrder: function() {
+        toggleSortOrder() {
             this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
+            this.sortLessons();
         },
-        addToCart: function(lesson) {
-            this.cart.push(lesson);
-            this.lessons.find(l => l.subject === lesson.subject).space--;
+        addToCart(lesson) {
+            // Create a copy to avoid direct mutation
+            const lessonToAdd = {...lesson};
+            this.cart.push(lessonToAdd);
+            
+            // Find and update the lesson in the original array
+            const foundLesson = this.lessons.find(l => l._id === lesson._id);
+            if (foundLesson) {
+                foundLesson.space--;
+            }
         },
-        removeFromCart: function(index) {
+        removeFromCart(index) {
             const removedLesson = this.cart.splice(index, 1)[0];
-            this.lessons.find(l => l.subject === removedLesson.subject).space++;
+            
+            // Find and update the lesson in the original array
+            const foundLesson = this.lessons.find(l => l._id === removedLesson._id);
+            if (foundLesson) {
+                foundLesson.space++;
+            }
         },
-        toggleCart: function() {
+        toggleCart() {
             this.showLessons = !this.showLessons;
             this.showCart = !this.showCart;
+        },
+        checkout() {
+            // Validate before proceeding
+            if (!this.isCheckoutEnabled) {
+                alert('Please fill in valid name and phone number');
+                return;
+            }
+
+            const orderDetails = {
+                name: this.customerName,
+                phoneNumber: this.customerPhone,
+                lessonIDs: this.cart.map(lesson => lesson._id),
+                quantity: this.cart.length
+            };
+
+            fetch('http://localhost:5001/api/orders', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(orderDetails)
+            })
+            .then(response => {
+                console.log('Checkout response status:', response.status);
+                if (!response.ok) {
+                    return response.json().then(err => { throw err; });
+                }
+                return response.json();
+            })
+            .then(data => {
+                alert('Order placed successfully!');
+                // Reset cart and view
+                this.cart = [];
+                this.showCart = false;
+                this.showLessons = true;
+                this.customerName = '';
+                this.customerPhone = '';
+            })
+            .catch(error => {
+                console.error('Checkout error:', error);
+                alert('Failed to place order: ' + 
+                    (error.message || 'Unknown error occurred')
+                );
+            });
         }
+    },
+    created() {
+        // Fetch lessons dynamically from back-end
+        fetch('http://localhost:5001/api/lessons/products')
+            .then(response => {
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Received data:', data);
+                this.lessons = data; // Populate lessons
+            })
+            .catch(error => {
+                console.error('Full error fetching lessons:', error);
+                alert('Failed to load courses: ' + error.message);
+            });
     }
 });
 </script>
