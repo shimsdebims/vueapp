@@ -1,22 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Specify the character encoding for the document -->
     <meta charset="UTF-8">
+    <!-- Set the viewport to make the website responsive on different devices -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Title of the web page -->
     <title>Lesson App</title>
+    <!-- Include the Vue.js library from a CDN -->
     <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <!-- Link to the external JavaScript file (app.js) that contains the Vue instance and logic -->
     <script src="app.js" defer></script>
 </head>
 <body>
+    <!-- Main application container bound to the Vue instance with the ID 'app' -->
     <div id="app">
+        <!-- Header for the lessons section -->
         <h1>Lessons</h1>
-        <input type="text" v-model="searchQuery" @input="searchLessons" placeholder="Search lessons...">
+        
+        <!-- Input field for searching lessons, bound to the searchQuery data property -->
+        <input type="text" 
+               v-model="searchQuery" 
+               @input="searchLessons" 
+               placeholder="Search lessons...">
+        
+        <!-- Unordered list to display the fetched lessons -->
         <ul>
+            <!-- Loop through each lesson in the lessons array and display its details -->
             <li v-for="lesson in lessons" :key="lesson._id">
+                <!-- Display the subject, location, and price of the lesson -->
                 {{ lesson.subject }} - {{ lesson.location }} - {{ lesson.price }}
+                <!-- Button to add the lesson to the cart, triggering the addToCart method -->
                 <button @click="addToCart(lesson)">Add to Cart</button>
             </li>
         </ul>
+
+        <!-- Input fields for collecting user details -->
+        <input type="text" 
+               v-model="userName" 
+               placeholder="Enter your name" />
+        <input type="text" 
+               v-model="userPhone" 
+               placeholder="Enter your phone number" />
+
+        <!-- Button to place an order, triggering the placeOrder method -->
         <button @click="placeOrder">Place Order</button>
     </div>
 </body>
