@@ -1,4 +1,5 @@
-// app.js
+// Import Axios library
+import axios from 'axios';
 
 // Create a new Vue instance and bind it to the HTML element with the ID 'app'
 new Vue({
@@ -18,28 +19,29 @@ new Vue({
     // Lifecycle hook that runs after the Vue instance has been mounted to the DOM
     mounted() {
         // Call the method to fetch lessons from the API when the component is mounted
-        this.fetchLessons();
+        console.log('Vue instance mounted');
+        this.fetchLessons(); //triggers the fetch request
     },
     methods: {
         // Asynchronous method to fetch lessons from the server
         async fetchLessons() {
             try {
-                // Make a GET request to the API endpoint to fetch lessons
-                const response = await fetch('http://localhost:5001/api/lessons');
-                // Parse the JSON response and store the lessons in the 'lessons' data property
-                this.lessons = await response.json();
+                const response = await axios.get('http://localhost:5001/lessons');
+                this.lessons = response.data;
             } catch (error) {
-                // Log any errors that occur during the fetch operation
                 console.error('Error fetching lessons:', error);
+                this.lessons = []; // Reset lessons array on error
             }
         },
         // Asynchronous method to search for lessons based on user input
         async searchLessons() {
             try {
                 // Make a GET request to the search API endpoint with the user's search query
-                const response = await fetch(`http://localhost:5001/api/search?query=${this.searchQuery}`);
-                // Parse the JSON response and update the 'lessons' data property with the search results
-                this.lessons = await response.json();
+                const response = await axios.get(`http://localhost:5001/search`, {
+                    params: { query: this.searchQuery }
+                });
+                // Update the 'lessons' data property with the search results
+                this.lessons = response.data;
             } catch (error) {
                 // Log any errors that occur during the search operation
                 console.error('Error searching lessons:', error);
@@ -61,21 +63,13 @@ new Vue({
             };
             try {
                 // Make a POST request to the orders API endpoint with the order data
-                const response = await fetch('http://localhost:5001/api/orders', {
-                    method: 'POST', // Specify the request method
-                    headers: {
-                        'Content-Type': 'application/json' // Set the content type to JSON
-                    },
-                    body: JSON.stringify(order) // Convert the order object to a JSON string for the request body
-                });
-                // Parse the JSON response from the server
-                const result = await response.json();
+                const response = await axios.post('http://localhost:5001/orders', order);
                 // Log the result of the order placement
-                console.log('Order placed:', result);
+                console.log('Order placed:', response.data);
             } catch (error) {
                 // Log any errors that occur during the order placement
                 console.error('Error placing order:', error);
             }
         }
     }
-  });
+});

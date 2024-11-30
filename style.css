@@ -43,3 +43,16 @@ input {
     padding: 10px;
     width: calc(100% - 22px);
 }
+
+ul {
+    list-style-type: none; /* Remove bullet points */
+    padding: 0; /* Remove padding */
+}
+
+.lesson-item {
+    margin: 10px 0; /* Add margin between lessons */
+    padding: 10px; /* Add padding for each lesson item */
+    border: 1px solid #ddd; /* Add a border to each lesson item */
+    border-radius: 5px; /* Round the corners */
+    background-color: #fff; /* Background color for lesson items */
+}
