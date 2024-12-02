@@ -192,7 +192,7 @@
                 async updateLessonSpaces(lesson) {
                     // Update the available spaces of a lesson on the backend
                     try {
-                        await fetch(`http://express-backend.onrender.com/Lessons/${lesson._id}`, {
+                        await fetch(`/Lessons/${lesson._id}`, {
                             method: 'PUT',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ space: lesson.space })
