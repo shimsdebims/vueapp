@@ -40,7 +40,7 @@ createApp({
         async fetchLessons() {
             // Fetch lessons from the backend API
             try {
-                const response = await fetch('http://express-backend.onrender.com/Lessons');
+                const response = await fetch('https://express-backend-fyqh.onrender.com//Lessons');
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 this.lessons = await response.json();
             } catch (error) {
@@ -93,7 +93,7 @@ createApp({
                         date: new Date()
                     };
 
-                    const response = await fetch('http://express-backend.onrender.com/Orders', {
+                    const response = await fetch('https://express-backend-fyqh.onrender.com/Orders', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(order)
