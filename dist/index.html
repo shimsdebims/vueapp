@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>After School Lessons</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        .cart-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Cart Toggle Button -->
+        <button 
+            class="cart-button" 
+            @click="toggleCartView"
+        >
+            {{ showCart ? 'Back to Lessons' : `View Cart (${cart.length})` }}
+        </button>
+
+        <h1>After School Lessons</h1>
+
+        <!-- Lessons View -->
+        <div v-if="!showCart" class="lesson-list">
+            <!-- Search Bar -->
+            <div class="search-bar">
+                <input 
+                    type="text" 
+                    v-model="searchTerm" 
+                    placeholder="Search lessons..."
+                >
+            </div>
+
+            <!-- Sorting Controls -->
+            <div class="sort-controls">
+                <select v-model="sortBy">
+                    <option value="subject">Subject</option>
+                    <option value="location">Location</option>
+                    <option value="price">Price</option>
+                    <option value="space">Spaces Available</option>
+                </select>
+                
+                <button @click="toggleSortOrder">
+                    {{ sortOrder === 'asc' ? 'Ascending' : 'Descending' }}
+                </button>
+            </div>
+
+            <!-- Lesson Cards -->
+            <div class="lesson-list">
+                <div v-for="lesson in sortedAndFilteredLessons" :key="lesson._id" class="lesson">
+                    <!-- Debugging: Log image path -->
+                    <img 
+                        :src="getImagePath(lesson.image)" 
+                        :alt="lesson.subject"
+                        @error="handleImageError"
+                        style="max-width: 100%; height: 150px; object-fit: cover;"
+                    >
+                    <h2>{{ lesson.subject }}</h2>
+                    <p>Location: {{ lesson.location }}</p>
+                    <p>Price: £{{ lesson.price }}</p>
+                    <p>Spaces Left: {{ lesson.space }}</p>
+                    <button 
+                        @click="addToCart(lesson)" 
+                        :disabled="lesson.space <= 0"
+                    >
+                        {{ lesson.space > 0 ? 'Add to Cart' : 'No Spaces' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cart View -->
+        <div v-else class="cart">
+            <h2>Shopping Cart</h2>
+            
+            <!-- Cart Items -->
+            <div v-if="cart.length > 0">
+                <div v-for="(cartItem, index) in cart" :key="index" class="cart-item">
+                    <p>{{ cartItem.subject }} - {{ cartItem.location }} - £{{ cartItem.price }}</p>
+                    <button @click="removeFromCart(index)">Remove</button>
+                </div>
+
+                <!-- Checkout Form -->
+                <div class="checkout-form">
+                    <input 
+                        v-model="customerName" 
+                        placeholder="Your Name (Letters only)"
+                        pattern="[A-Za-z ]+"
+                    >
+                    <input 
+                        v-model="phoneNumber" 
+                        placeholder="Phone Number (8+ digits)"
+                        type="tel"
+                        pattern="\d{8,}"
+                    >
+                    <button 
+                        @click="checkout"
+                        :disabled="!isCheckoutValid"
+                    >
+                        Checkout
+                    </button>
+                </div>
+            </div>
+            <p v-else>Your cart is empty</p>
+        </div>
+
+        <!-- Confirmation Modal -->
+        <div v-if="showConfirmation" class="modal">
+            <div class="modal-content">
+                <h2>Order Confirmed!</h2>
+                <p>Thank you for your purchase!</p>
+                <button @click="showConfirmation = false">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    lessons: [], // List of lessons fetched from the backend
+                    cart: [], // List of items in the cart
+                    searchTerm: '', // Search term for filtering lessons
+                    sortBy: 'subject', // Attribute to sort lessons by
+                    sortOrder: 'asc', // Sorting order (ascending or descending)
+                    showCart: false, // Toggle between lessons view and cart view
+                    customerName: '', // Customer's name for checkout
+                    phoneNumber: '', // Customer's phone number for checkout
+                    showConfirmation: false // Toggle for the confirmation modal
+                }
+            },
+            computed: {
+                sortedAndFilteredLessons() {
+                    // Filter lessons by search term
+                    let filtered = this.lessons.filter(lesson =>
+                        lesson.subject.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+                        lesson.location.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+                        lesson.price.toString().includes(this.searchTerm)
+                    );
+
+                    // Sort lessons by the selected attribute
+                    return filtered.sort((a, b) => {
+                        let modifier = this.sortOrder === 'asc' ? 1 : -1;
+                        return a[this.sortBy] > b[this.sortBy] ? modifier : -modifier;
+                    });
+                },
+                isCheckoutValid() {
+                    // Validate that the customer name and phone number are valid
+                    const nameValid = /^[A-Za-z ]+$/.test(this.customerName);
+                    const phoneValid = /^\d{8,}$/.test(this.phoneNumber);
+                    return nameValid && phoneValid && this.cart.length > 0;
+                }
+            },
+            methods: {
+                async fetchLessons() {
+                    // Fetch lessons from the backend API
+                    try {
+                        const response = await fetch('http://express-backend.onrender.com/Lessons');
+                        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                        this.lessons = await response.json();
+                    } catch (error) {
+                        console.error('Error fetching lessons:', error);
+                    }
+                },
+                addToCart(lesson) {
+                    // Add a lesson to the cart and decrement its available spaces
+                    if (lesson.space > 0) {
+                        this.cart.push({ ...lesson });
+                        lesson.space--;
+                        this.updateLessonSpaces(lesson);
+                    }
+                },
+                removeFromCart(index) {
+                    // Remove a lesson from the cart and restore its available spaces
+                    const removedLesson = this.cart[index];
+                    this.cart.splice(index, 1);
+
+                    const originalLesson = this.lessons.find(l => l._id === removedLesson._id);
+                    if (originalLesson) {
+                        originalLesson.space++;
+                        this.updateLessonSpaces(originalLesson);
+                    }
+                },
+                async updateLessonSpaces(lesson) {
+                    // Update the available spaces of a lesson on the backend
+                    try {
+                        await fetch(`/Lessons/${lesson._id}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ space: lesson.space })
+                        });
+                    } catch (error) {
+                        console.error('Error updating lesson spaces:', error);
+                    }
+                },
+                toggleCartView() {
+                    // Toggle between lessons view and cart view
+                    this.showCart = !this.showCart;
+                },
+                async checkout() {
+                    // Send the cart data to the backend to create an order
+                    if (this.isCheckoutValid) {
+                        try {
+                            const order = {
+                                lessons: this.cart,
+                                customerName: this.customerName,
+                                phoneNumber: this.phoneNumber,
+                                date: new Date()
+                            };
+
+                            const response = await fetch('http://express-backend.onrender.com/Orders', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(order)
+                            });
+
+                            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+                            // Show confirmation modal and reset the cart
+                            this.showConfirmation = true;
+                            this.cart = [];
+                            this.customerName = '';
+                            this.phoneNumber = '';
+                        } catch (error) {
+                            console.error('Error during checkout:', error);
+                            alert('Failed to place order. Please try again.');
+                        }
+                    }
+                }
+            },
+            mounted() {
+                // Fetch lessons when the component is mounted
+                this.fetchLessons();
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
