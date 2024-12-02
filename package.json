@@ -5,10 +5,10 @@
   "main": "main.js",
   "homepage": "https://shimsdebims.github.io/afterSchoolApp",
   "scripts": {
-    "build": "mkdir -p dist && cp src/index.html dist/index.html && cp src/style.css dist/style.css && cp src/main.js dist/main.js",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
-  },
+  "build": "mkdir -p dist && cp index.html dist/index.html && cp style.css dist/style.css && cp main.js dist/main.js",
+  "predeploy": "npm run build",
+  "deploy": "gh-pages -d dist"
+},
   "keywords": [],
   "author": "",
   "license": "ISC",
