@@ -5,69 +5,38 @@
     <title>After School Lessons</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <style>
-        .cart-button {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-        }
-    </style>
 </head>
 <body>
     <div id="app">
-        <!-- Cart Toggle Button -->
-        <button 
-            class="cart-button" 
-            @click="toggleCartView"
-        >
+        <button @click="toggleCartView">
             {{ showCart ? 'Back to Lessons' : `View Cart (${cart.length})` }}
         </button>
 
         <h1>After School Lessons</h1>
 
-        <!-- Lessons View -->
-        <div v-if="!showCart" class="lesson-list">
-            <!-- Search Bar -->
-            <div class="search-bar">
-                <input 
-                    type="text" 
-                    v-model="searchTerm" 
-                    placeholder="Search lessons..."
-                >
-            </div>
+        <div v-if="!showCart">
+            <input v-model="searchTerm" placeholder="Search lessons...">
 
-            <!-- Sorting Controls -->
             <div class="sort-controls">
                 <select v-model="sortBy">
                     <option value="subject">Subject</option>
                     <option value="location">Location</option>
                     <option value="price">Price</option>
-                    <option value="space">Spaces Available</option>
                 </select>
-                
-                <button @click="toggleSortOrder">
+                <button @click="sortOrder = sortOrder === 'asc' ? 'desc' : 'asc'">
                     {{ sortOrder === 'asc' ? 'Ascending' : 'Descending' }}
                 </button>
             </div>
 
-            <!-- Lesson Cards -->
             <div class="lesson-list">
                 <div v-for="lesson in sortedAndFilteredLessons" :key="lesson._id" class="lesson">
-                    <!-- Debugging: Log image path -->
-                    <img 
-                        :src="getImagePath(lesson.image)" 
-                        :alt="lesson.subject"
-                        @error="handleImageError"
-                        style="max-width: 100%; height: 150px; object-fit: cover;"
-                    >
                     <h2>{{ lesson.subject }}</h2>
                     <p>Location: {{ lesson.location }}</p>
                     <p>Price: £{{ lesson.price }}</p>
                     <p>Spaces Left: {{ lesson.space }}</p>
                     <button 
                         @click="addToCart(lesson)" 
-                        :disabled="lesson.space <= 0"
+                        :disabled="lesson.space === 0"
                     >
                         {{ lesson.space > 0 ? 'Add to Cart' : 'No Spaces' }}
                     </button>
@@ -75,42 +44,30 @@
             </div>
         </div>
 
-        <!-- Cart View -->
         <div v-else class="cart">
             <h2>Shopping Cart</h2>
-            
-            <!-- Cart Items -->
+
             <div v-if="cart.length > 0">
                 <div v-for="(cartItem, index) in cart" :key="index" class="cart-item">
                     <p>{{ cartItem.subject }} - {{ cartItem.location }} - £{{ cartItem.price }}</p>
                     <button @click="removeFromCart(index)">Remove</button>
                 </div>
 
-                <!-- Checkout Form -->
                 <div class="checkout-form">
-                    <input 
-                        v-model="customerName" 
-                        placeholder="Your Name (Letters only)"
-                        pattern="[A-Za-z ]+"
-                    >
-                    <input 
-                        v-model="phoneNumber" 
-                        placeholder="Phone Number (8+ digits)"
-                        type="tel"
-                        pattern="\d{8,}"
-                    >
+                    <input v-model="customerName" placeholder="Your Name">
+                    <input v-model="phoneNumber" placeholder="Phone Number">
                     <button 
-                        @click="checkout"
+                        @click="checkout" 
                         :disabled="!isCheckoutValid"
                     >
                         Checkout
                     </button>
                 </div>
             </div>
+
             <p v-else>Your cart is empty</p>
         </div>
 
-        <!-- Confirmation Modal -->
         <div v-if="showConfirmation" class="modal">
             <div class="modal-content">
                 <h2>Order Confirmed!</h2>

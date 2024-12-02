@@ -36,6 +36,9 @@ createApp({
             return nameValid && phoneValid && this.cart.length > 0;
         }
     },
+    
+    const: BASE_URL = 'https://express-backend-fyqh.onrender.com', // Your Render backend URL
+
     methods: {
         async fetchLessons() {
             try {
@@ -114,7 +117,8 @@ createApp({
         }
     },
     mounted() {
-        // Fetch lessons when the component is mounted
+        console.log('App mounted');
+        console.log('Current origin:', window.location.origin);
         this.fetchLessons();
-    }
+    },
 }).mount('#app');

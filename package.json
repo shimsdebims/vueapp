@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Task: Create the Front-End of a fictitious web app, which allows students and their parents to buy after school classes and activities. Then, you need to build the Back-End for the app. MongoDB will be used for storing the data, and data exchange between the app and the database will be done through REST API implemented using Express.js. The Back-End will run on a Node.js server",
   "main": "main.js",
-  "homepage": "https://shimsdebims.github.io/afterSchoolApp",
+  "homepage": "https://shimsdebims.github.io/vueapp",
   "scripts": {
   "build": "mkdir -p dist && cp index.html dist/index.html && cp style.css dist/style.css && cp main.js dist/main.js",
   "predeploy": "npm run build",
