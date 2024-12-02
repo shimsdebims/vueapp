@@ -41,10 +41,11 @@ createApp({
     methods: {
         async fetchLessons() {
             try {
-                const response = await fetch('https://express-backend-fyqh.onrender.com/Lessons');
-                mode; 'cors',
-                method; 'GET', //specifying the request method
-                    'Content-Type'; 'application/json'
+                const response = await fetch('https://express-backend-fyqh.onrender.com/Lessons', {
+                    mode: 'cors',
+                    method: 'GET', // specifying the request method
+                    headers: { 'Content-Type': 'application/json' }
+                });
                 const lessons = await response.json();
                 console.log('Fetched lessons:', lessons); // Log the fetched lessons
                 this.lessons = lessons; // Update the lessons data
@@ -124,4 +125,4 @@ createApp({
         console.log('Current origin:', window.location.origin);
         this.fetchLessons();
     },
-}).mount('#');
+}).mount('#app');
