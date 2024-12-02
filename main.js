@@ -122,7 +122,6 @@ createApp({
     },
     mounted() {
         console.log('App mounted');
-        console.log('Current origin:', window.location.origin);
         this.fetchLessons();
     },
 }).mount('#app');

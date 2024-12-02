@@ -2,9 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>After School Lessons</title>
-    <link rel="stylesheet" href="style.css">
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div id="app">
@@ -12,12 +13,9 @@
             {{ showCart ? 'Back to Lessons' : `View Cart (${cart.length})` }}
         </button>
 
-        <h1>After School Lessons</h1>
-
         <div v-if="!showCart">
-            <input v-model="searchTerm" placeholder="Search lessons...">
-
             <div class="sort-controls">
+                <input v-model="searchTerm" placeholder="Search lessons">
                 <select v-model="sortBy">
                     <option value="subject">Subject</option>
                     <option value="location">Location</option>
@@ -46,16 +44,14 @@
 
         <div v-else class="cart">
             <h2>Shopping Cart</h2>
-
             <div v-if="cart.length > 0">
                 <div v-for="(cartItem, index) in cart" :key="index" class="cart-item">
-                    <p>{{ cartItem.subject }} - {{ cartItem.location }} - £{{ cartItem.price }}</p>
+                    {{ cartItem.subject }} - {{ cartItem.location }} - £{{ cartItem.price }}
                     <button @click="removeFromCart(index)">Remove</button>
                 </div>
-
                 <div class="checkout-form">
-                    <input v-model="customerName" placeholder="Your Name">
-                    <input v-model="phoneNumber" placeholder="Phone Number">
+                    <input v-model="customerName" placeholder="Your Name" required>
+                    <input v-model="phoneNumber" placeholder="Phone Number" required>
                     <button 
                         @click="checkout" 
                         :disabled="!isCheckoutValid"
@@ -64,7 +60,6 @@
                     </button>
                 </div>
             </div>
-
             <p v-else>Your cart is empty</p>
         </div>
 
