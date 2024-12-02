@@ -38,13 +38,13 @@ createApp({
     },
     methods: {
         async fetchLessons() {
-            // Fetch lessons from the backend API
             try {
                 const response = await fetch('https://express-backend-fyqh.onrender.com/Lessons');
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 this.lessons = await response.json();
             } catch (error) {
                 console.error('Error fetching lessons:', error);
+                alert('Failed to fetch lessons. Please check the console for details.');
             }
         },
         addToCart(lesson) {
