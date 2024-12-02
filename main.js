@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
         methods: {
             async fetchLessons() {
                 try {
-                    const response = await fetch('https://express-backend-fyqh.onrender.com/Lessons', {
+                    const response = await fetch('/api/Lessons', {
                         method: 'GET',
                         mode: 'cors',
                         headers: {
@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
             async updateLessonSpaces(lesson) {
                 // Update the available spaces of a lesson on the backend
                 try {
-                    await fetch(`/Lessons/${lesson._id}`, {
+                    await fetch(`https://express-backend-fyqh.onrender.com/Lessons/${lesson._id}`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ space: lesson.space })
