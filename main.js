@@ -120,8 +120,5 @@ createApp({
             }
         }
     },
-    mounted() {
-        console.log('App mounted');
-        this.fetchLessons();
-    },
+  
 }).mount('#app');
