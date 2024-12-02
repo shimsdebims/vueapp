@@ -163,7 +163,7 @@
                 async fetchLessons() {
                     // Fetch lessons from the backend API
                     try {
-                        const response = await fetch('http://localhost:3001/Lessons');
+                        const response = await fetch('http://express-backend.onrender.com/Lessons');
                         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                         this.lessons = await response.json();
                     } catch (error) {
@@ -192,7 +192,7 @@
                 async updateLessonSpaces(lesson) {
                     // Update the available spaces of a lesson on the backend
                     try {
-                        await fetch(`http://localhost:3001/Lessons/${lesson._id}`, {
+                        await fetch(`http://express-backend.onrender.com/Lessons/${lesson._id}`, {
                             method: 'PUT',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ space: lesson.space })
@@ -216,7 +216,7 @@
                                 date: new Date()
                             };
 
-                            const response = await fetch('http://localhost:3001/Orders', {
+                            const response = await fetch('http://express-backend.onrender.com/Orders', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify(order)
