@@ -37,14 +37,17 @@ createApp({
         }
     },
     
-    const: BASE_URL = 'https://express-backend-fyqh.onrender.com', // Your Render backend URL
 
     methods: {
         async fetchLessons() {
             try {
                 const response = await fetch('https://express-backend-fyqh.onrender.com/Lessons');
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                this.lessons = await response.json();
+                mode; 'cors',
+                method; 'GET', //specifying the request method
+                    'Content-Type'; 'application/json'
+                const lessons = await response.json();
+                console.log('Fetched lessons:', lessons); // Log the fetched lessons
+                this.lessons = lessons; // Update the lessons data
             } catch (error) {
                 console.error('Error fetching lessons:', error);
                 alert('Failed to fetch lessons. Please check the console for details.');
@@ -121,4 +124,4 @@ createApp({
         console.log('Current origin:', window.location.origin);
         this.fetchLessons();
     },
-}).mount('#app');
+}).mount('#');
