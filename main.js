@@ -58,9 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 } catch (error) {
                     console.error('Fetch error:', error);
                 }
-                getImagePath(imageName) {
-                    return `https://express-backend-fyqh.onrender.com/images/${imageName}`;
-                }
+            
                 
             },
             addToCart(lesson) {
