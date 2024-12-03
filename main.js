@@ -1,6 +1,7 @@
 console.log("Vue version:", Vue.version);
 const { createApp } = Vue;
 
+
 document.addEventListener('DOMContentLoaded', () => {
     createApp({
         data() {
@@ -41,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
         methods: {
             async fetchLessons() {
                 try {
-                    const response = await fetch('/api/Lessons', {
+                    const response = await fetch('https://express-backend-fyqh.onrender.com/Lessons', {
                         method: 'GET',
                         mode: 'cors',
                         headers: {
@@ -54,6 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
                     const lessons = await response.json();
+                    console.log('Fetched lessons:', lessons);
                     this.lessons = lessons;
                 } catch (error) {
                     console.error('Fetch error:', error);
