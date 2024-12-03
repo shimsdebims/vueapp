@@ -32,6 +32,7 @@
                     <p>Location: {{ lesson.location }}</p>
                     <p>Price: £{{ lesson.price }}</p>
                     <p>Spaces Left: {{ lesson.space }}</p>
+                    <img :src="getImagePath(lesson.image)":alt="lesson.subject">
                     <button 
                         @click="addToCart(lesson)" 
                         :disabled="lesson.space === 0"

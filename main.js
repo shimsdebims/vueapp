@@ -44,12 +44,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 try {
                     const response = await fetch('https://express-backend-fyqh.onrender.com/Lessons', {
                         method: 'GET',
-                        mode: 'cors',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    });
-
+                        headers: { 'Content-Type': 'application/json' },
+                    });                    
+                    console.log('Response status:', response.status);
+                    console.log('Response headers:', response.headers);
                     if (!response.ok) {
                         throw new Error(`HTTP status ${response.status}`);
                     }
@@ -60,6 +58,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 } catch (error) {
                     console.error('Fetch error:', error);
                 }
+                getImagePath(imageName) {
+                    return `https://express-backend-fyqh.onrender.com/images/${imageName}`;
+                }
+                
             },
             addToCart(lesson) {
                 // Add a lesson to the cart and decrement its available spaces
@@ -87,6 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ space: lesson.space })
+                        
                     });
                 } catch (error) {
                     console.error('Error updating lesson spaces:', error);
@@ -101,28 +104,40 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (this.isCheckoutValid) {
                     try {
                         const order = {
-                            lessons: this.cart,
+                            lessons: this.cart.map(lesson => ({
+                                subject: lesson.subject,
+                                location: lesson.location,
+                                price: lesson.price,
+                            })),
                             customerName: this.customerName,
                             phoneNumber: this.phoneNumber,
-                            date: new Date()
+                            totalPrice: this.cart.reduce((total, lesson) => total + lesson.price, 0),
+                            createdAt: new Date()
                         };
-
-                        const response = await fetch('https://express-backend-fyqh.onrender.com/checkout', {
+            
+                        const response = await fetch('https://express-backend-fyqh.onrender.com/Orders', {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
+                            headers: { 
+                                'Content-Type': 'application/json' 
+                            },
                             body: JSON.stringify(order)
                         });
-
+            
+                        const responseData = await response.json();
+            
                         if (!response.ok) {
-                            throw new Error(`HTTP status ${response.status}`);
+                            throw new Error(responseData.message || `HTTP status ${response.status}`);
                         }
-
+            
+                        console.log('Checkout successful:', responseData);
                         this.showConfirmation = true;
                         this.cart = []; // Clear the cart after successful checkout
                         this.customerName = '';
                         this.phoneNumber = '';
                     } catch (error) {
                         console.error('Checkout error:', error);
+                        // Optionally, show an error message to the user
+                        alert('Failed to complete checkout. Please try again.');
                     }
                 }
             }
