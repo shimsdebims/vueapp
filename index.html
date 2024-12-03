@@ -28,7 +28,6 @@
 
             <div class="lesson-list">
                 <div v-for="lesson in sortedAndFilteredLessons" :key="lesson._id" class="Lessons">
-                    <img :src="`images/${lesson.image}`" alt="Lesson Image" />
                     <h2>{{ lesson.subject }}</h2>
                     <p>Location: {{ lesson.location }}</p>
                     <p>Price: £{{ lesson.price }}</p>
